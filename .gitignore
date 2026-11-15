@@ -18,8 +18,6 @@ yarn-error.log
 /.idea
 /.vscode
 
-# Local docs / Postman
-/ZATCA-Production-Guide-Bangla.pdf
-/ZATCA-User-Guide-Bangla.pdf
+# Local thumbnails
 /ZATCA-Thumbnail-Blue.png
 /ZATCA-Thumbnail-Green.png
