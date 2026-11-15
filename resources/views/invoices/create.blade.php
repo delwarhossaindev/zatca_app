@@ -102,7 +102,13 @@
                 </div>
                 <div class="card-body">
                     <div class="mb-2"><label class="form-label small">Name</label><input name="buyer_name" class="form-control" value="{{ $value('buyer_name') }}"></div>
-                    <div class="mb-2"><label class="form-label small">VAT number</label><input name="buyer_vat_number" class="form-control" maxlength="15" value="{{ $value('buyer_vat_number') }}"></div>
+                    <div class="mb-2">
+                        <label class="form-label small">VAT number</label><input name="buyer_vat_number" class="form-control" maxlength="15" placeholder="3XXXXXXXXXXXXX3" value="{{ $value('buyer_vat_number') }}">
+                        <div class="form-text">
+                            Sandbox test VAT:
+                            <a href="#" onclick="this.closest('div.mb-2').querySelector('input').value = this.textContent.trim(); return false;" title="Use this number"><code>311111111111113</code></a>
+                        </div>
+                    </div>
                     <div class="mb-2"><label class="form-label small">Street</label><input name="buyer_street" class="form-control" value="{{ $value('buyer_street') }}"></div>
                     <div class="row g-2 mb-2">
                         <div class="col"><label class="form-label small">Building no.</label><input name="buyer_building_number" class="form-control" maxlength="4" value="{{ $value('buyer_building_number') }}"></div>

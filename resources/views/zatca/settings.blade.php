@@ -91,6 +91,10 @@
                     <div class="col-md-4">
                         <label class="form-label">VAT number</label>
                         <input name="vat_number" class="form-control" value="{{ old('vat_number', $setting->vat_number) }}" placeholder="3XXXXXXXXXXXXX3" maxlength="15" required>
+                        <div class="form-text">
+                            Sandbox test VAT:
+                            <a href="#" onclick="this.closest('div.col-md-4').querySelector('input').value = this.textContent.trim(); return false;" title="Use this number"><code>399999999900003</code></a>
+                        </div>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">CR number</label>
