@@ -17,3 +17,10 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+
+# Local docs / Postman
+/ZATCA-API.postman_collection.json
+/ZATCA-Production-Guide-Bangla.pdf
+/ZATCA-User-Guide-Bangla.pdf
+/ZATCA-Thumbnail-Blue.png
+/ZATCA-Thumbnail-Green.png
