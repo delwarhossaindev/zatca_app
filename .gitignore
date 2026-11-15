@@ -19,7 +19,6 @@ yarn-error.log
 /.vscode
 
 # Local docs / Postman
-/ZATCA-API.postman_collection.json
 /ZATCA-Production-Guide-Bangla.pdf
 /ZATCA-User-Guide-Bangla.pdf
 /ZATCA-Thumbnail-Blue.png
