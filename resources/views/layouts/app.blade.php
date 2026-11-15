@@ -217,6 +217,16 @@
         .z-footer { margin-top: auto; padding: 1.5rem 0; color: var(--z-muted); font-size: .8rem; border-top: 1px solid var(--z-line); background: rgba(255, 255, 255, .5); }
         .z-footer .ar { color: var(--z-gold); }
 
+        @media (max-width: 575.98px) {
+            main.container { padding-top: 1.25rem !important; padding-bottom: 1.5rem !important; }
+            .z-page-head { margin-bottom: 1.25rem; }
+            .z-page-head h1 { font-size: 1.3rem; }
+            .z-page-head .ar { font-size: .95rem; }
+            .z-head-icon { width: 44px; height: 44px; font-size: 1.2rem; border-radius: 13px; }
+            .z-brand-mark { width: 38px; height: 38px; }
+            .card-header { padding: .8rem 1rem; }
+        }
+
         @media print {
             .no-print { display: none !important; }
             body { background: #fff; }

@@ -21,6 +21,22 @@
     .z-totals > div + div { border-top: 1px solid var(--z-line); }
     .z-totals .ar { color: var(--z-gold); margin-inline-start: .35rem; }
     .z-totals-grand { background: linear-gradient(120deg, var(--z-green-dark), var(--z-green)); color: #fff; font-weight: 700; font-size: 1.05rem !important; }
+    /* Phones: each item becomes a small block (description, then qty / price / remove, then its total) */
+    @media (max-width: 767.98px) {
+        #items thead { display: none; }
+        #items, #items tbody { display: block; }
+        #items tr { display: grid; grid-template-columns: 1fr 1fr auto; gap: .5rem; align-items: end; padding: .9rem 1rem; border-bottom: 1px solid var(--z-line); }
+        #items td { display: block; padding: 0; border: 0; }
+        #items td:first-child { grid-column: 1 / -1; }
+        #items td.line-total { grid-column: 1 / -1; order: 1; display: flex; justify-content: space-between; text-align: start !important; }
+        #items td[data-label]::before { content: attr(data-label); display: block; font-size: .75rem; font-weight: 500; color: var(--z-muted); margin-bottom: .2rem; }
+        #items td.line-total::before { margin: 0; }
+        #items .remove { height: calc(1.5em + .75rem + 2px); }
+    }
+    @media (max-width: 575.98px) {
+        .z-totals .ar { display: block; margin-inline-start: 0; }
+        .card-footer .btn-success { width: 100%; }
+    }
 </style>
 @endpush
 
@@ -121,10 +137,10 @@
                         <tbody>
                         @foreach ($items as $i => $item)
                             <tr>
-                                <td><input name="items[{{ $i }}][name]" class="form-control" value="{{ $item['name'] }}" required></td>
-                                <td><input name="items[{{ $i }}][quantity]" type="number" step="any" min="0" class="form-control qty" value="{{ $item['quantity'] }}" required></td>
-                                <td><input name="items[{{ $i }}][unit_price]" type="number" step="0.01" min="0" class="form-control price" value="{{ $item['unit_price'] }}" required></td>
-                                <td class="text-end fw-semibold line-total">0.00</td>
+                                <td data-label="Description"><input name="items[{{ $i }}][name]" class="form-control" value="{{ $item['name'] }}" required></td>
+                                <td data-label="Qty"><input name="items[{{ $i }}][quantity]" type="number" step="any" min="0" class="form-control qty" value="{{ $item['quantity'] }}" required></td>
+                                <td data-label="Unit price"><input name="items[{{ $i }}][unit_price]" type="number" step="0.01" min="0" class="form-control price" value="{{ $item['unit_price'] }}" required></td>
+                                <td class="text-end fw-semibold line-total" data-label="Total incl. VAT">0.00</td>
                                 <td><button type="button" class="btn btn-sm btn-outline-danger remove" title="Remove item"><i class="bi bi-trash3"></i></button></td>
                             </tr>
                         @endforeach

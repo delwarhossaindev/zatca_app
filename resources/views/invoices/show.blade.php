@@ -37,6 +37,22 @@
     .z-sum > div + div { border-top: 1px solid var(--z-line); }
     .z-sum .ar { color: var(--z-gold); font-size: .8rem; margin-inline-start: .35rem; }
     .z-sum .grand { background: linear-gradient(120deg, var(--z-green-dark), var(--z-green)); color: #fff; font-weight: 700; font-size: 1.05rem; }
+    /* Phones: each line item becomes a block of label / value rows instead of a 7-column table */
+    @media screen and (max-width: 575.98px) {
+        .z-items thead { display: none; }
+        .z-items, .z-items tbody, .z-items tr, .z-items td { display: block; width: 100%; }
+        .z-items tr { padding: .8rem 1rem; border-bottom: 1px solid var(--z-line); }
+        .z-items tr:last-child { border-bottom: 0; }
+        .z-items td { display: flex; justify-content: space-between; gap: 1rem; padding: .15rem 0 !important; border: 0; text-align: end !important; }
+        .z-items td::before { content: attr(data-label); color: var(--z-muted); font-size: .8rem; font-weight: 500; text-align: start; }
+        .z-items td.z-item-num { display: none; }
+        .z-items td.z-item-name { padding-bottom: .4rem !important; text-align: start !important; }
+        .z-items td.z-item-name::before { content: none; }
+        .z-sum .ar { display: block; margin-inline-start: 0; }
+        .z-invoice-band { padding: 1.25rem !important; padding-top: 1.75rem !important; }
+        .z-invoice .card-body { padding: 1rem !important; }
+        .z-qr { width: 130px; }
+    }
     @media print {
         .z-invoice-band, .z-sum .grand { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         .z-invoice::before { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -132,7 +148,7 @@
         </div>
 
         <div class="table-responsive border rounded-3 mb-4" style="border-color: var(--z-line) !important">
-            <table class="table">
+            <table class="table z-items">
                 <thead>
                 <tr>
                     <th>#</th>
@@ -147,13 +163,13 @@
                 <tbody>
                 @foreach ($invoice->items as $item)
                     <tr>
-                        <td class="text-muted">{{ $loop->iteration }}</td>
-                        <td class="fw-semibold">{{ $item->name }}</td>
-                        <td class="text-end">{{ rtrim(rtrim(number_format($item->quantity, 6, '.', ''), '0'), '.') }}</td>
-                        <td class="text-end">{{ number_format($item->unit_price, 2) }}</td>
-                        <td class="text-end">{{ number_format($item->line_extension_amount, 2) }}</td>
-                        <td class="text-end">{{ number_format($item->vat_amount, 2) }} <span class="text-muted small">({{ (float) $item->vat_percent }}%)</span></td>
-                        <td class="text-end fw-semibold">{{ number_format($item->line_extension_amount + $item->vat_amount, 2) }}</td>
+                        <td class="text-muted z-item-num">{{ $loop->iteration }}</td>
+                        <td class="fw-semibold z-item-name">{{ $item->name }}</td>
+                        <td class="text-end" data-label="Qty · الكمية">{{ rtrim(rtrim(number_format($item->quantity, 6, '.', ''), '0'), '.') }}</td>
+                        <td class="text-end" data-label="Unit price · سعر الوحدة">{{ number_format($item->unit_price, 2) }}</td>
+                        <td class="text-end" data-label="Net · الصافي">{{ number_format($item->line_extension_amount, 2) }}</td>
+                        <td class="text-end" data-label="VAT · الضريبة"><span>{{ number_format($item->vat_amount, 2) }} <span class="text-muted small">({{ (float) $item->vat_percent }}%)</span></span></td>
+                        <td class="text-end fw-semibold" data-label="Total · الإجمالي">{{ number_format($item->line_extension_amount + $item->vat_amount, 2) }}</td>
                     </tr>
                 @endforeach
                 </tbody>

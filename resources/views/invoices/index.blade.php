@@ -12,8 +12,18 @@
     .z-doc-icon { width: 36px; height: 36px; flex: none; display: grid; place-items: center; border-radius: 10px; background: var(--z-gold-soft); color: var(--z-green); }
     .z-empty { padding: 4rem 1rem; text-align: center; }
     .z-empty-icon { width: 76px; height: 76px; margin: 0 auto 1rem; display: grid; place-items: center; border-radius: 22px; font-size: 2rem; color: var(--z-gold); background: linear-gradient(140deg, var(--z-green), var(--z-green-dark)); }
+    .z-inv-card { padding: .9rem 1rem; transition: border-color .15s; }
+    .z-inv-card:active, .z-inv-card:hover { border-color: var(--z-gold); }
+    @media (max-width: 575.98px) {
+        .z-stat { flex-direction: column; align-items: flex-start; gap: .6rem; padding: 1rem; }
+        .z-stat-icon { width: 40px; height: 40px; font-size: 1.1rem; border-radius: 12px; }
+    }
 </style>
 @endpush
+
+@php
+    $docIcon = fn ($invoice) => match ($invoice->document_type) { 'credit' => 'bi-arrow-counterclockwise', 'debit' => 'bi-plus-slash-minus', default => 'bi-receipt' };
+@endphp
 
 @section('content')
 <x-page-header title="Invoices" arabic="الفواتير" icon="receipt-cutoff">
@@ -49,7 +59,36 @@
     @endforeach
 </div>
 
-<div class="card">
+{{-- Phones get a card per invoice; the table needs more width than a phone has --}}
+<div class="d-md-none vstack gap-2">
+    @forelse ($invoices as $invoice)
+        <a href="{{ route('invoices.show', $invoice) }}" class="card z-inv-card text-reset text-decoration-none">
+            <div class="d-flex align-items-center gap-2">
+                <span class="z-doc-icon"><i class="bi {{ $docIcon($invoice) }}"></i></span>
+                <div class="flex-grow-1 text-truncate">
+                    <div class="fw-semibold">{{ $invoice->invoice_number }}</div>
+                    <div class="small text-muted text-truncate">{{ $invoice->documentLabel() }}</div>
+                </div>
+                <div class="text-end text-nowrap">
+                    <div class="fw-bold">{{ number_format($invoice->total_amount, 2) }}</div>
+                    <div class="small text-muted">SAR</div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center gap-2 mt-2 pt-2 border-top small" style="border-color: var(--z-line) !important">
+                <span class="text-muted text-truncate"><i class="bi bi-calendar3"></i> {{ $invoice->issue_date->format('Y-m-d') }} · #{{ $invoice->icv }}@if ($invoice->buyer_name) · {{ $invoice->buyer_name }}@endif</span>
+                @include('invoices.partials.status', ['status' => $invoice->zatca_status])
+            </div>
+        </a>
+    @empty
+        <div class="card z-empty">
+            <div class="z-empty-icon"><i class="bi bi-receipt"></i></div>
+            <div class="fw-semibold">No invoices yet</div>
+            <div class="ar text-center" style="color: var(--z-gold)">لا توجد فواتير بعد</div>
+        </div>
+    @endforelse
+</div>
+
+<div class="card d-none d-md-block">
     <div class="table-responsive">
         <table class="table table-hover align-middle">
             <thead>
@@ -68,7 +107,7 @@
                 <tr role="button" onclick="location.href='{{ route('invoices.show', $invoice) }}'">
                     <td>
                         <div class="d-flex align-items-center gap-2">
-                            <span class="z-doc-icon"><i class="bi {{ match ($invoice->document_type) { 'credit' => 'bi-arrow-counterclockwise', 'debit' => 'bi-plus-slash-minus', default => 'bi-receipt' } }}"></i></span>
+                            <span class="z-doc-icon"><i class="bi {{ $docIcon($invoice) }}"></i></span>
                             <span class="fw-semibold">{{ $invoice->invoice_number }}</span>
                         </div>
                     </td>
