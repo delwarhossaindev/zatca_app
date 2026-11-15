@@ -1,9 +1,9 @@
 @php
-    $class = match ($status) {
-        'REPORTED', 'CLEARED' => 'bg-success',
-        'NOT_REPORTED', 'NOT_CLEARED', 'ERROR' => 'bg-danger',
-        'pending' => 'bg-secondary',
-        default => 'bg-warning text-dark',
+    [$class, $icon] = match ($status) {
+        'REPORTED', 'CLEARED' => ['ok', 'bi-patch-check-fill'],
+        'NOT_REPORTED', 'NOT_CLEARED', 'ERROR' => ['bad', 'bi-x-octagon-fill'],
+        'pending' => ['wait', 'bi-hourglass-split'],
+        default => ['warn', 'bi-exclamation-triangle-fill'],
     };
 @endphp
-<span class="badge {{ $class }}">{{ str_replace('_', ' ', $status) }}</span>
+<span class="z-status {{ $class }}"><i class="bi {{ $icon }}"></i> {{ str_replace('_', ' ', $status) }}</span>

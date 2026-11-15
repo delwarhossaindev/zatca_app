@@ -25,9 +25,17 @@ class InvoiceController extends Controller
 
     public function index(): View
     {
+        $counts = Invoice::query()->selectRaw('zatca_status, count(*) as total')->groupBy('zatca_status')->pluck('total', 'zatca_status');
+
         return view('invoices.index', [
             'invoices' => Invoice::query()->latest('id')->paginate(20),
             'setting' => ZatcaSetting::current(),
+            'stats' => [
+                'all' => $counts->sum(),
+                'accepted' => $counts->only(['REPORTED', 'CLEARED'])->sum(),
+                'pending' => $counts->get('pending', 0),
+                'rejected' => $counts->only(['NOT_REPORTED', 'NOT_CLEARED', 'ERROR'])->sum(),
+            ],
         ]);
     }
 

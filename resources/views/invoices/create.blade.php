@@ -7,17 +7,32 @@
         ? $original->items->map->only(['name', 'quantity', 'unit_price'])->all()
         : [['name' => '', 'quantity' => 1, 'unit_price' => '']]);
     $value = fn ($field, $default = null) => old($field, $original?->{$field} ?? $default);
+    [$pageTitle, $pageArabic, $pageIcon] = match ($documentType) {
+        'credit' => ['New credit note', 'إشعار دائن جديد', 'arrow-counterclockwise'],
+        'debit' => ['New debit note', 'إشعار مدين جديد', 'plus-slash-minus'],
+        default => ['New invoice', 'فاتورة ضريبية جديدة', 'file-earmark-plus'],
+    };
 @endphp
 
+@push('head')
+<style>
+    .z-totals { border: 1px solid var(--z-line); border-radius: 12px; overflow: hidden; }
+    .z-totals > div { padding: .55rem .9rem; font-size: .9rem; }
+    .z-totals > div + div { border-top: 1px solid var(--z-line); }
+    .z-totals .ar { color: var(--z-gold); margin-inline-start: .35rem; }
+    .z-totals-grand { background: linear-gradient(120deg, var(--z-green-dark), var(--z-green)); color: #fff; font-weight: 700; font-size: 1.05rem !important; }
+</style>
+@endpush
+
 @section('content')
-<h1 class="h3 mb-3">New {{ $documentType === 'invoice' ? 'invoice' : $documentType.' note' }}</h1>
+<x-page-header :title="$pageTitle" :arabic="$pageArabic" :icon="$pageIcon" :back="route('invoices.index')" back-label="Invoices" />
 
 <form method="POST" action="{{ route('invoices.store') }}" id="invoice-form">
     @csrf
     <div class="row g-4">
         <div class="col-lg-4">
             <div class="card mb-4">
-                <div class="card-header bg-white fw-semibold">Document</div>
+                <div class="card-header"><span class="z-chip"><i class="bi bi-file-earmark-text"></i></span> Document <span class="ar">المستند</span></div>
                 <div class="card-body">
                     <div class="mb-3">
                         <label class="form-label">Invoice type</label>
@@ -64,7 +79,11 @@
             </div>
 
             <div class="card">
-                <div class="card-header bg-white fw-semibold">Buyer <span class="text-muted small buyer-optional">(optional for simplified)</span></div>
+                <div class="card-header">
+                    <span class="z-chip"><i class="bi bi-person-vcard"></i></span>
+                    <span>Buyer <span class="text-muted small fw-normal buyer-optional">(optional for simplified)</span></span>
+                    <span class="ar">المشتري</span>
+                </div>
                 <div class="card-body">
                     <div class="mb-2"><label class="form-label small">Name</label><input name="buyer_name" class="form-control" value="{{ $value('buyer_name') }}"></div>
                     <div class="mb-2"><label class="form-label small">VAT number</label><input name="buyer_vat_number" class="form-control" maxlength="15" value="{{ $value('buyer_vat_number') }}"></div>
@@ -83,13 +102,21 @@
 
         <div class="col-lg-8">
             <div class="card">
-                <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
-                    Items <span class="badge bg-light text-dark">VAT 15% (Standard rate)</span>
+                <div class="card-header">
+                    <span class="z-chip"><i class="bi bi-basket"></i></span> Items
+                    <span class="z-status warn ms-1"><i class="bi bi-percent"></i> VAT 15% standard rate</span>
+                    <span class="ar">البنود</span>
                 </div>
                 <div class="table-responsive">
-                    <table class="table align-middle mb-0" id="items">
-                        <thead class="table-light">
-                        <tr><th>Description</th><th style="width:110px">Qty</th><th style="width:140px">Unit price</th><th class="text-end" style="width:130px">Total incl. VAT</th><th style="width:50px"></th></tr>
+                    <table class="table align-middle" id="items">
+                        <thead>
+                        <tr>
+                            <th>Description <span class="ar">الوصف</span></th>
+                            <th style="width:110px">Qty <span class="ar">الكمية</span></th>
+                            <th style="width:140px">Unit price <span class="ar">سعر الوحدة</span></th>
+                            <th class="text-end" style="width:130px">Total incl. VAT <span class="ar">الإجمالي</span></th>
+                            <th style="width:50px"></th>
+                        </tr>
                         </thead>
                         <tbody>
                         @foreach ($items as $i => $item)
@@ -97,27 +124,33 @@
                                 <td><input name="items[{{ $i }}][name]" class="form-control" value="{{ $item['name'] }}" required></td>
                                 <td><input name="items[{{ $i }}][quantity]" type="number" step="any" min="0" class="form-control qty" value="{{ $item['quantity'] }}" required></td>
                                 <td><input name="items[{{ $i }}][unit_price]" type="number" step="0.01" min="0" class="form-control price" value="{{ $item['unit_price'] }}" required></td>
-                                <td class="text-end line-total">0.00</td>
-                                <td><button type="button" class="btn btn-sm btn-outline-danger remove"><i class="bi bi-trash"></i></button></td>
+                                <td class="text-end fw-semibold line-total">0.00</td>
+                                <td><button type="button" class="btn btn-sm btn-outline-danger remove" title="Remove item"><i class="bi bi-trash3"></i></button></td>
                             </tr>
                         @endforeach
                         </tbody>
                     </table>
                 </div>
                 <div class="card-body border-top">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" id="add-item"><i class="bi bi-plus"></i> Add item</button>
-                    <dl class="row mb-0 mt-3 text-end">
-                        <dt class="col-8 fw-normal">Total excl. VAT</dt><dd class="col-4" id="sum-net">0.00</dd>
-                        <dt class="col-8 fw-normal">VAT 15%</dt><dd class="col-4" id="sum-vat">0.00</dd>
-                        <dt class="col-8">Total incl. VAT (SAR)</dt><dd class="col-4 fw-bold" id="sum-total">0.00</dd>
-                    </dl>
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-5">
+                            <button type="button" class="btn btn-outline-secondary" id="add-item"><i class="bi bi-plus-circle"></i> Add item</button>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="z-totals">
+                                <div class="d-flex justify-content-between gap-2"><span>Total excl. VAT <span class="ar small">الإجمالي غير شامل الضريبة</span></span><span id="sum-net">0.00</span></div>
+                                <div class="d-flex justify-content-between gap-2"><span>VAT 15% <span class="ar small">ضريبة القيمة المضافة</span></span><span id="sum-vat">0.00</span></div>
+                                <div class="d-flex justify-content-between gap-2 z-totals-grand"><span>Total incl. VAT (SAR) <span class="ar small">الإجمالي شامل الضريبة</span></span><span id="sum-total">0.00</span></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+                <div class="card-footer d-flex flex-wrap justify-content-between align-items-center gap-2">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" name="submit_now" value="1" id="submit_now" checked>
-                        <label class="form-check-label" for="submit_now">Submit to ZATCA immediately</label>
+                        <label class="form-check-label" for="submit_now"><i class="bi bi-cloud-arrow-up"></i> Submit to ZATCA immediately</label>
                     </div>
-                    <button class="btn btn-success"><i class="bi bi-pen"></i> Sign & save</button>
+                    <button class="btn btn-success px-4"><i class="bi bi-pen"></i> Sign &amp; save <span class="ar small ms-1">توقيع وحفظ</span></button>
                 </div>
             </div>
         </div>
